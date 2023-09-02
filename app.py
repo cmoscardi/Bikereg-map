@@ -1,44 +1,63 @@
-from flask import Flask, render_template
-import feedparser
+from flask import Flask, render_template, request
 import pandas as pd
 import glob
 import json
+import requests
+from datetime import datetime
+import time
+import os
 
 app = Flask(__name__)
 BIKEREG_URL="https://www.bikereg.com/events/CalendarFeed.aspx?et=&rg=0&ns=&ne=15&pid=&states=&t=rss&type="
+br_url = "https://www.bikereg.com/api/search"
 
-def load_pn_file(pn_fname):
-    print('loading file', pn_fname)
-    cols_to_keep = ["feature_name", "prim_lat_dec", "prim_long_dec"]
-    pn_df = pd.read_csv(pn_fname, delimiter="|", usecols=cols_to_keep)
-    pn_df["feature_name"] = pn_df["feature_name"].str.lower()
-    pn_df["state_name"] = pn_fname.split(".")[0].split("_")[-1].lower()
-    # match bikereg format for ease-of-merge
-    pn_df["citystate"] = pn_df["feature_name"] + ", " + pn_df["state_name"]
-    return pn_df
+def trydate(x):
+    x = x[6:-7]
+    try:
+        return datetime.fromtimestamp((int(x) / 1000) + 4 * 3600).date().strftime("%Y-%m-%d")
+    except:
+        print(x)
+        raise
 
-def load_and_clean_geo_index():
-    index_files = glob.glob("place_names/DomesticNames*.txt")
-    placenames = pd.concat((load_pn_file(fname) for fname in index_files), ignore_index=True)
-    # 1 possibility per city,state
-    return placenames.drop_duplicates(subset=["feature_name", "state_name"])
+def make_br_call(startpage=0):
+    br_page_url = br_url + "?startpage={}".format(startpage)
+    rj = requests.get(br_page_url).json()["MatchingEvents"]
+    rdf = pd.DataFrame(rj)
+    if len(rdf) == 0:
+        return rdf
+    rdf["date"] = rdf["EventDate"].apply(trydate)
+    return rdf
 
-def parse_events_list():
-    feed = feedparser.parse(BIKEREG_URL)
-    entries = pd.DataFrame(feed['entries'])
-    entries["citystate"] = entries["title"].str.split(" - ").str[-1].str.lower()
-    return entries
-    
+def load_br_data():
+    if os.path.exists("events.pkl"):
+        print("reading pickle")
+        return pd.read_pickle("events.pkl")
+    print("loading BR data...")
+    responses = []
+    latest_df = ['x']
+    i = 0
+    while len(latest_df) > 0:
+        print("loading page {}".format(i))
+        latest_df = make_br_call(startpage=i)
+        print("{} results".format(len(latest_df)))
+        responses.append(latest_df)
+        print("====")
+        time.sleep(.5)
+        i = i + 1
+    events =  pd.concat(responses, ignore_index=True)
+    events.to_pickle("events.pkl")
+    return events
 
-events_list = parse_events_list()
-placenames = load_and_clean_geo_index()
-combined = events_list.merge(placenames, on='citystate')
+bikereg_events = load_br_data()
+gmaps_func = lambda x: "https://maps.google.com?q={},{}".format(x["Latitude"], x["Longitude"])
+bikereg_events["gmaps_url"] = bikereg_events.apply(gmaps_func, axis=1)
 
 @app.route("/api/events")
 def events():
     # this is so we can add other status info if needed
-    return combined
-    .to_dict(orient='records')
+    argsdict = request.args
+    fields_to_return = ["EventName", "EventUrl", "date", "Latitude", "Longitude", "EventTypes", "gmaps_url"]
+    return {"events": bikereg_events[fields_to_return].dropna(subset=["Latitude", "Longitude"]).to_dict(orient='records')}
 
 @app.route("/")
 def index():
