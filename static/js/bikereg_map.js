@@ -94,6 +94,17 @@ var startDate = document.getElementById("start-date");
 var endDate = document.getElementById("end-date");
 var eventType = document.getElementById("event-type");
 
+var crossGagHappened = false;
+function doCrossGag() {
+    //var marquee = "<marquee style='position: absolute; top: 0;' class='cross-marquee' direction='down'>cross is coming</marquee>";
+    var marquee = document.createElement('h1');
+    marquee.innerHTML = 'CROSS IS COMING';
+    marquee.style = 'position: absolute; top:0; left: 50vw; animation: cross-gag 3s linear; z-index: 99999;'
+    document.body.appendChild(marquee);
+    crossGagHappened = true;
+    setTimeout(() => document.body.removeChild(marquee), 5000);
+}
+
 function filterEventsHandler() {
     if(startDate.value) {
         var startDateVal = new Date(startDate.value);
@@ -113,6 +124,11 @@ function filterEventsHandler() {
         if(eventType.value && (eventType.value != "thedefaultoption")){
             filt = filt && (x.EventTypes.includes(eventType.value))
         }
+
+        if((eventType.value == "Cyclocross") && !(crossGagHappened)) {
+            doCrossGag();
+        }
+
         return filt
     }
     eventsToShow = events.filter(filterEvent);
