@@ -1,3 +1,5 @@
+#!/home/codespace/.python/current/bin/python
+
 from flask import Flask, render_template, request
 import pandas as pd
 import glob
@@ -22,16 +24,13 @@ def trydate(x):
 def make_br_call(startpage=0):
     br_page_url = br_url + "?startpage={}".format(startpage)
     rj = requests.get(br_page_url).json()["MatchingEvents"]
-    rdf = pd.DataFrame(rj)
+    rdf = pd.DataFrame(rj)  
     if len(rdf) == 0:
         return rdf
     rdf["date"] = rdf["EventDate"].apply(trydate)
     return rdf
 
 def load_br_data():
-    if os.path.exists("events.pkl"):
-        print("reading pickle")
-        return pd.read_pickle("events.pkl")
     print("loading BR data...")
     responses = []
     latest_df = ['x']
@@ -48,7 +47,7 @@ def load_br_data():
     events.to_pickle("events.pkl")
     return events
 
-bikereg_events = load_br_data()
+bikereg_events = pd.read_pickle("events.pkl")
 gmaps_func = lambda x: "https://maps.google.com?q={},{}".format(x["Latitude"], x["Longitude"])
 bikereg_events["gmaps_url"] = bikereg_events.apply(gmaps_func, axis=1)
 
@@ -64,4 +63,4 @@ def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    load_br_data()
