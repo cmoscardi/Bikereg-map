@@ -44,7 +44,7 @@ def load_br_data():
         time.sleep(.5)
         i = i + 1
     events =  pd.concat(responses, ignore_index=True)
-    events.to_pickle("events.pkl")
+    events.to_json("events.json")
     return events
 
 bikereg_events = pd.read_pickle("events.pkl")
@@ -63,4 +63,8 @@ def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
-    load_br_data()
+    import sys
+    if len(sys.argv) == 1:
+        load_br_data()
+    else:
+        app.run(debug=True)

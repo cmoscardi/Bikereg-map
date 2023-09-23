@@ -50,7 +50,7 @@ function renderEventsToShow(){
 }
 
 const Http = new XMLHttpRequest();
-const url='/api/events';
+const url='/events.json';
 Http.open("GET", url);
 Http.send();
 console.log("we sent this boi");
@@ -61,7 +61,7 @@ var eventsByType = null;
 Http.onload = (e) => {
     res = Http.response;
     console.log("eh??");
-    events = JSON.parse(Http.response)["events"];
+    events = JSON.parse(Http.response);
     eventsByType = {};
     function addToEventsByType(e) {
         e.EventTypes.forEach((t) => {
