@@ -1,0 +1,18 @@
+name: get-bikereg-latest
+run-name: ${{ github.actor }} is updating latest bikereg info
+on: [push]
+jobs:
+  check-bats-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: update events.json
+        run: python app.py
+      - name: switching from HTTPS to SSH
+        run: git remote set-url origin ${{ secrets.ssh }}
+      - name: stage changed files
+        run: git add events.json
+      - name: commit changes
+        run: git commit -m 'sync events.json'
+      - name: push changes
+        run: git push origin main
