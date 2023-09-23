@@ -44,7 +44,7 @@ def load_br_data():
         time.sleep(.5)
         i = i + 1
     events =  pd.concat(responses, ignore_index=True)
-    events.to_json("events.json")
+    events.to_json("events.json", orient='records')
     return events
 
 bikereg_events = pd.read_pickle("events.pkl")

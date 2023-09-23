@@ -26,6 +26,7 @@ function popUpForEvents(eventlist){
 function renderEventsToShow(){
     eventLayer.clearLayers();
     var toShowByLatLon = {};
+    nEventsShown = 0;
     eventsToShow.forEach( (x) => {
         latlonstr = String(x["Latitude"]) + "-" + String(x["Longitude"]);
         if(!(latlonstr in toShowByLatLon)){
@@ -38,7 +39,9 @@ function renderEventsToShow(){
         L.marker([latlonevents[0].Latitude, latlonevents[0].Longitude])
          .addTo(eventLayer)
          .bindPopup(popUpForEvents(latlonevents));
+        nEventsShown = nEventsShown + 1;
     });
+    console.log(nEventsShown + " events shown");
     // eventsToShow.forEach( (x) => {
     //     L.marker([x.Latitude, x.Longitude]).addTo(eventLayer)
         //  .bindPopup(x.EventName + '<hr />'
@@ -47,6 +50,10 @@ function renderEventsToShow(){
         //             + genLink(x.gmaps_url));
     // });
     console.log("yesyes??");
+}
+
+function latLonFilter(event) {
+    return event.Latitude && event.Longitude;
 }
 
 const Http = new XMLHttpRequest();
@@ -60,8 +67,10 @@ var eventsToShow = null;
 var eventsByType = null;
 Http.onload = (e) => {
     res = Http.response;
-    console.log("eh??");
     events = JSON.parse(Http.response);
+    console.log(events.length + " before filter");
+    events = events.filter(latLonFilter);
+    console.log(events.length + " after latlon filter");
     eventsByType = {};
     function addToEventsByType(e) {
         e.EventTypes.forEach((t) => {
