@@ -9,7 +9,7 @@ jobs:
       - name: install pandas and requests
         run: pip install pandas requests
       - name: update events.json
-        run: python app.py
+        run: python sync-events.py
       - name: stage changed files
         run: git add events.json
       - name: set git username
