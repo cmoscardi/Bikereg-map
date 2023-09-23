@@ -57,7 +57,7 @@ function latLonFilter(event) {
 }
 
 const Http = new XMLHttpRequest();
-const url='/events.json';
+const url='events.json';
 Http.open("GET", url);
 Http.send();
 console.log("we sent this boi");
