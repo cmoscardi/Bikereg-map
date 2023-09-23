@@ -2,10 +2,12 @@ name: get-bikereg-latest
 run-name: ${{ github.actor }} is updating latest bikereg info
 on: [push]
 jobs:
-  check-bats-version:
+  get-bikereg-latest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: install pandas and requests
+        run: pip install pandas requests
       - name: update events.json
         run: python app.py
       - name: switching from HTTPS to SSH
