@@ -12,8 +12,9 @@ jobs:
         run: python app.py
       - name: stage changed files
         run: git add events.json
-      - name: set username
+      - name: set git username
         run: git config --global user.name "Github action"
+      - name: set git email
         run: git config --global user.email "no-reply@github.com"
       - name: commit changes
         run: git commit -m 'sync events.json'
