@@ -1,16 +1,14 @@
 ## Bikereg map
 It's bikereg, but in map form
 
+https://www.christianmoscardi.com/Bikereg-map
 
-## dev notes
-i think we're gonna need a backend (or a free geocoding API and CORS get-aroundder).
+## How it works
+- Web frontend: See `index.html`
+- Backend: `events.json`
+    - updated via `sync-events.py` and a github action
 
-backend will
-- geocode
-- cache bikereg RSS
-- yuck
-- maybe email if geocoding doesn't work
+## Acknowledgments
+Thank you bikereg!!
 
-## geocode strategy
-this file has the goods (we just need to do city/state)
-- https://prd-tnm.s3.amazonaws.com/StagedProducts/GeographicNames/DomesticNames/DomesticNames_AllStates_Text.zip
+
