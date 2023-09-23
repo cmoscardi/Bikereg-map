@@ -44,7 +44,11 @@ def load_br_data():
         time.sleep(.5)
         i = i + 1
     events =  pd.concat(responses, ignore_index=True)
-    
+    # add google maps url
+    gmaps_func = lambda x: "https://maps.google.com?q={},{}".format(x["Latitude"], x["Longitude"])
+    events["gmaps_url"] = events.apply(gmaps_func, axis=1)
+
+    # save off
     events.to_json("events.json", orient='records')
     return events
 
