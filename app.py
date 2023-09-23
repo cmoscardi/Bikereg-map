@@ -47,9 +47,6 @@ def load_br_data():
     events.to_json("events.json", orient='records')
     return events
 
-bikereg_events = pd.read_pickle("events.pkl")
-gmaps_func = lambda x: "https://maps.google.com?q={},{}".format(x["Latitude"], x["Longitude"])
-bikereg_events["gmaps_url"] = bikereg_events.apply(gmaps_func, axis=1)
 
 
 
