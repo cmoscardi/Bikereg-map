@@ -1,15 +1,15 @@
 #!/home/codespace/.python/current/bin/python
 
-from flask import Flask, render_template, request
-import pandas as pd
 import glob
 import json
-import requests
 from datetime import datetime
 import time
 import os
 
-app = Flask(__name__)
+import pandas as pd
+import requests
+
+
 BIKEREG_URL="https://www.bikereg.com/events/CalendarFeed.aspx?et=&rg=0&ns=&ne=15&pid=&states=&t=rss&type="
 br_url = "https://www.bikereg.com/api/search"
 
@@ -51,20 +51,7 @@ bikereg_events = pd.read_pickle("events.pkl")
 gmaps_func = lambda x: "https://maps.google.com?q={},{}".format(x["Latitude"], x["Longitude"])
 bikereg_events["gmaps_url"] = bikereg_events.apply(gmaps_func, axis=1)
 
-@app.route("/api/events")
-def events():
-    # this is so we can add other status info if needed
-    argsdict = request.args
-    fields_to_return = ["EventName", "EventUrl", "date", "Latitude", "Longitude", "EventTypes", "gmaps_url"]
-    return {"events": bikereg_events[fields_to_return].dropna(subset=["Latitude", "Longitude"]).to_dict(orient='records')}
 
-@app.route("/")
-def index():
-    return render_template("index.html")
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) == 1:
-        load_br_data()
-    else:
-        app.run(debug=True)
+    load_br_data()
